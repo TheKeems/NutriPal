@@ -162,7 +162,26 @@ h1 {
     color: #fff; /* Change input field text color */
 }
 
-/* Add more styles for other elements as needed */
+/* Responsive Styles */
+@media only screen and (max-width: 600px) {
+    .container {
+        max-width: 90%; /* Adjust container width for smaller screens */
+        margin: 10px auto; /* Adjust margin */
+    }
+    
+    .ingredient-input {
+        flex-direction: column; /* Stack inputs vertically on smaller screens */
+    }
+    
+    .ingredient-input input {
+        margin-bottom: 10px; /* Add spacing between inputs */
+    }
+    
+    .dark-mode-switch {
+        top: 10px; /* Adjust position of dark mode switch */
+        right: 10px;
+    }
+}
 
 </style>
 </head>
