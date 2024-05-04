@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nutritional Value Calculator</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+<style>
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f2f2f2;
+    transition: background-color 0.5s, color 0.5s; /* Smooth transition for dark mode */
+    color: #333; /* Default text color */
+}
+
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.5s, box-shadow 0.5s; /* Smooth transition for dark mode */
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.ingredient-input {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ingredient-input input {
+    flex: 1;
+    margin-right: 10px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+#result {
+    margin-top: 20px;
+    display: none; /* Hide by default */
+}
+
+#result.visible {
+    display: block; /* Display when results are ready */
+}
+
+#result h2 {
+    margin-top: 20px;
+}
+
+#result ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+#result li {
+    margin-bottom: 5px;
+}
+
+.button-group {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.button-group button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin: 0 5px;
+}
+
+.button-group button:hover {
+    background-color: #0056b3;
+}
+
+.dark-mode-switch {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    color: #333;
+    z-index: 9999; /* Ensure the switch is above other content */
+}
+
+.dark-mode-switch input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 40px;
+    height: 20px;
+    background-color: #ccc;
+    border-radius: 20px;
+    outline: none;
+    cursor: pointer;
+    position: relative;
+    transition: background-color 0.3s;
+}
+
+.dark-mode-switch input[type="checkbox"]:checked {
+    background-color: #007bff;
+}
+
+.dark-mode-switch input[type="checkbox"]::before {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-color: #fff;
+    border-radius: 50%;
+    top: 0;
+    left: 0;
+    transition: transform 0.3s;
+}
+
+.dark-mode-switch input[type="checkbox"]:checked::before {
+    transform: translateX(20px);
+}
+
+.dark-mode-switch label {
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+/* Dark mode styles */
+.dark-mode {
+    background-color: #222; /* Change background color to dark */
+    color: #fff; /* Change text color to white */
+}
+
+.dark-mode .container {
+    background-color: #333; /* Change container background color to a darker shade */
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1); /* Adjust box shadow color */
+}
+
+.dark-mode input[type="text"],
+.dark-mode input[type="number"],
+.dark-mode .dark-mode-switch span { /* Adjust text color for slider text */
+    color: #fff; /* Change text color to white */
+}
+
+.dark-mode input[type="text"],
+.dark-mode input[type="number"] {
+    background-color: #444; /* Change input field background color */
+    color: #fff; /* Change input field text color */
+}
+
+/* Add more styles for other elements as needed */
+
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>Nutritional Value Calculator</h1>
+    <div class="button-group">
+        <button type="button" id="add-ingredient-btn">Add Ingredient</button>
+        <button type="button" id="remove-ingredient-btn">Remove Ingredient</button>
+        <button type="button" id="calculate-btn">Calculate</button>
+    </div>
+    <form id="calculator-form">
+        <div id="ingredients-container">
+            <div class="ingredient-input">
+                <input type="text" name="ingredient1" class="ingredient" placeholder="Ingredient" required>
+                <input type="number" name="quantity1" class="quantity" placeholder="Quantity (grams)" required>
+            </div>
+        </div>
+    </form>
+    <div id="result">
+        <!-- Results will be displayed here -->
+    </div>
+</div>
+
+<div class="dark-mode-switch">
+    <span>Light Mode</span> <!-- Added text for light mode -->
+    <input type="checkbox" id="dark-mode-toggle">
+    <label for="dark-mode-toggle">Dark Mode</label>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('#add-ingredient-btn').click(function() {
+        const numIngredients = $('.ingredient-input').length + 1;
+        const newIngredientInput = `
+            <div class="ingredient-input" style="display: none;">
+                <input type="text" name="ingredient${numIngredients}" class="ingredient" placeholder="Ingredient" required>
+                <input type="number" name="quantity${numIngredients}" class="quantity" placeholder="Quantity (grams)" required>
+            </div>
+        `;
+        $('#ingredients-container').append(newIngredientInput);
+        $('.ingredient-input').last().fadeIn();
+    });
+
+    $('#remove-ingredient-btn').click(function() {
+        $('.ingredient-input').last().remove();
+    });
+
+    $('#calculate-btn').click(async function() {
+        const ingredients = [];
+        $('.ingredient-input').each(function() {
+            const ingredient = $(this).find('.ingredient').val().trim();
+            const quantity = $(this).find('.quantity').val().trim();
+            if (ingredient !== '' && quantity !== '') {
+                ingredients.push({ ingredient, quantity });
+            }
+        });
+
+        const apiKey = "4ZSmhbkNZX5yeJjsFCdmYpDTV0FAc3lSYzieVtDG";
+
+        try {
+            const results = [];
+            const totalNutritionalInfo = {};
+
+            for (const { ingredient, quantity } of ingredients) {
+                const searchUrl = `https://api.nal.usda.gov/fdc/v1/foods/search?query=${encodeURIComponent(ingredient)}&api_key=${apiKey}`;
+                const searchResponse = await fetch(searchUrl);
+                const searchData = await searchResponse.json();
+
+                if (!searchResponse.ok || !searchData.foods || searchData.foods.length === 0) {
+                    throw new Error(`Nutritional information not found for the ingredient: ${ingredient}`);
+                }
+
+                const foodId = searchData.foods[0].fdcId;
+                const foodName = searchData.foods[0].description;
+                const detailUrl = `https://api.nal.usda.gov/fdc/v1/food/${foodId}?api_key=${apiKey}`;
+
+                const detailResponse = await fetch(detailUrl);
+                const detailData = await detailResponse.json();
+
+                if (!detailResponse.ok || !detailData.foodNutrients) {
+                    throw new Error(`Failed to fetch nutritional data for the ingredient: ${ingredient}`);
+                }
+
+                const nutritionalInfo = {};
+                detailData.foodNutrients.forEach(nutrient => {
+                    if (nutrient.nutrient && nutrient.nutrient.name && nutrient.amount) {
+                        const nutrientName = nutrient.nutrient.name;
+                        const nutrientUnit = nutrient.nutrient.unitName;
+                        const nutrientValuePer100g = nutrient.amount;
+
+                        if (nutrientName && nutrientUnit && nutrientValuePer100g) {
+                            const nutrientValue = ((nutrientValuePer100g * quantity) / 100).toFixed(2);
+                            nutritionalInfo[nutrientName] = {
+                                'value': nutrientValue,
+                                'unit': nutrientUnit
+                            };
+                            if (totalNutritionalInfo[nutrientName]) {
+                                totalNutritionalInfo[nutrientName].value = (parseFloat(totalNutritionalInfo[nutrientName].value) + parseFloat(nutrientValue)).toFixed(2);
+                            } else {
+                                totalNutritionalInfo[nutrientName] = {
+                                    'value': nutrientValue,
+                                    'unit': nutrientUnit
+                                };
+                            }
+                        }
+                    }
+                });
+
+                results.push({
+                    'food_name': foodName,
+                    'nutritional_info': nutritionalInfo
+                });
+            }
+
+            let resultHtml = '';
+            results.forEach(result => {
+                resultHtml += `<h2>${result.food_name}</h2>`;
+                resultHtml += '<ul>';
+                Object.entries(result.nutritional_info).forEach(([nutrient, data]) => {
+                    resultHtml += `<li>${nutrient}: ${data.value} ${data.unit ? data.unit : ''}</li>`;
+                });
+                resultHtml += '</ul>';
+            });
+
+            resultHtml += '<h2>Total Nutritional Info</h2>';
+            resultHtml += '<ul>';
+            Object.entries(totalNutritionalInfo).forEach(([nutrient, data]) => {
+                resultHtml += `<li>${nutrient}: ${data.value} ${data.unit ? data.unit : ''}</li>`;
+            });
+            resultHtml += '</ul>';
+
+            $('#result').html(resultHtml).addClass('visible');
+            animateResult();
+        } catch (error) {
+            console.error('Error:', error.message);
+            $('#result').html(`An error occurred: ${error.message}`).addClass('visible');
+        }
+    });
+
+    function animateResult() {
+        anime.timeline({ easing: 'easeOutExpo' })
+            .add({
+                targets: '#result',
+                opacity: [0, 1],
+                translateY: [50, 0],
+                duration: 800,
+            })
+            .add({
+                targets: '#result h2',
+                opacity: [0, 1],
+                translateY: [50, 0],
+                duration: 800,
+                delay: anime.stagger(200)
+            })
+            .add({
+                targets: '#result li',
+                opacity: [0, 1],
+                translateY: [50, 0],
+                duration: 800,
+                delay: anime.stagger(100)
+            });
+    }
+
+    // Dark mode switch functionality
+    $('#dark-mode-toggle').change(function() {
+        if ($(this).is(':checked')) {
+            $('body').addClass('dark-mode');
+        } else {
+            $('body').removeClass('dark-mode');
+        }
+    });
+});
+</script>
+</body>
+</html>
