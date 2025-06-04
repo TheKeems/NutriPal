@@ -163,7 +163,20 @@ h1 {
     background-color: #444; /* Change input field background color */
     color: #fff; /* Change input field text color */
 }
+.footer-note {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    font-size: 14px;
+    color: #666;
+    z-index: 999;
+}
 
+/* Dark mode support */
+.dark-mode .footer-note {
+    color: #ccc;
+}
+    
 /* Responsive Styles */
 @media only screen and (max-width: 600px) {
     .container {
